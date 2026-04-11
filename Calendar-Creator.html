@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midnight Serenade Calendar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="contextMenu" class="context-menu">
+    <div class="menu-item" onclick="contextCopy()">Copy Event</div>
+    <div class="menu-item" onclick="contextPaste()">Paste Event</div>
+    <div class="menu-divider"></div>
+    <div class="menu-item" onclick="copyDiscordTimestamp()">Copy Discord TS</div>
+    <div class="menu-divider"></div>
+    <div class="menu-item menu-delete" onclick="contextDelete()">Delete</div>
+</div>
+
+<div class="sidebar">
+    <h1 style="font-family: 'Cinzel'; color: var(--gold); text-align: center; margin-bottom: 30px; letter-spacing: 4px;">MS Calendar</h1>
+    
+    <div class="section">
+        <label>System Period</label>
+        <div style="display: flex; gap: 8px;">
+            <select id="monthSelect"></select>
+            <input type="number" id="yearInput" style="width: 100px;">
+        </div>
+    </div>
+
+    <div class="section">
+        <label>Display Timezone</label>
+<select id="timezoneSelect">
+    <option value="UTC">UTC (Universal)</option>
+    <option value="America/New_York">EST (New York)</option>
+    <option value="America/Chicago">CST (Chicago)</option>
+    <option value="America/Denver">MST (Denver)</option>
+    <option value="America/Los_Angeles">PST (Los Angeles)</option>
+    <option value="Europe/London">GMT (London)</option>
+    <option value="Europe/Paris">CET (Paris/Berlin)</option>
+    <option value="Australia/Sydney">AEST (Sydney)</option>
+</select>
+    </div>
+
+    <div class="section">
+        <label>Global Tools</label>
+        <button class="btn" onclick="downloadCalendar()">Capture Calendar</button>
+        <button class="btn" onclick="downloadItinerary()">Capture List Image</button>
+        <button class="btn" onclick="copyDiscordFullList()" style="border-color: #5865F2; color: #5865F2;">Copy Discord List</button>
+        <button class="btn" onclick="toggleRightTab()">View List</button>
+    </div>
+
+    <div style="margin-top: auto;">
+        <label>System Reset</label>
+        <button class="btn" style="border-color: #442222; color: #885555;" onclick="localStorage.clear(); location.reload();">Wipe Cache</button>
+    </div>
+</div>
+
+<div class="canvas-wrapper">
+    <div id="export-area">
+        <h1 id="month-display">JANUARY</h1>
+        <div class="calendar-grid" id="grid"></div>
+        <div class="brand-signature">
+            <img src="icons/ms_logo.png" alt="Midnight Serenade Logo">
+            <div class="brand-text">MIDNIGHT SERENADE</div>
+        </div>
+    </div>
+    <button class="tab-toggle-btn" onclick="toggleRightTab()">LIST</button>
+</div>
+
+<div id="itinerary-tab" class="itinerary-tab">
+    <div id="itinerary-capture-box">
+        <div id="itinerary-content"></div>
+    </div>
+</div>
+
+<div id="modalOverlay">
+    <div class="modal-content">
+        <h3 id="editingTitle" style="font-family: 'Cinzel'; color: var(--gold); margin-top: 0;">Setup Event</h3>
+        
+        <label>Event Title</label>
+        <input type="text" id="eventName" maxlength="40">
+        
+        <div style="display: flex; gap: 15px; margin-top: 15px;">
+            <div style="flex:1"><label>Event Start (UTC)</label><input type="time" id="startTime"></div>
+            <div style="flex:1"><label>Event End (UTC)</label><input type="time" id="endTime"></div>
+        </div>
+
+        <div class="section-divider" style="margin: 25px 0 15px 0; border-top: 1px solid #2a2a40;"></div>
+        <label>Host Schedule & Shifts</label>
+
+        <div id="hostTimelineList" class="host-timeline-container" style="max-height: 160px; overflow-y: auto; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="text-align:center; font-size:10px; color:#444; padding:20px; letter-spacing:1px;">NO SHIFTS SCHEDULED</div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 4px; border: 1px solid #1a1a24;">
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+<div style="flex: 2;">
+    <label>Host Name</label>
+    <select id="shiftHostName" style="padding: 8px; width: 100%; background: #000; color: #fff; border: 1px solid #333;">
+        </select>
+</div>
+                <div style="flex: 1;">
+                    <label>Role</label>
+                    <select id="shiftRole" style="padding: 7px;">
+                        <option value="Host">Host</option>
+                        <option value="Co-Host">Co-Host</option>
+                        <option value="Game Master">Game Master</option>
+                        <option value="Support">Support</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label>Shift Start</label>
+                    <input type="time" id="shiftStart" style="padding: 8px;">
+                </div>
+                <div style="flex: 1;">
+                    <label>Shift End</label>
+                    <input type="time" id="shiftEnd" style="padding: 8px;">
+                </div>
+                <button class="btn btn-gold" style="width: 45px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;" onclick="addShiftToTimeline()">
+                    <span style="font-size: 20px;">+</span>
+                </button>
+            </div>
+        </div>
+
+        <label style="margin-top:20px;">Icon Configuration</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="iconPicker" onchange="handleDropdownChange()" style="flex: 1;"></select>
+            <button class="btn" id="variantToggleBtn" onclick="handleIconChange()" style="width: 45px; padding: 5px; display: none; background: var(--gold); color: #000; border: none;">
+                <span style="font-size: 18px;">➔</span>
+            </button>
+        </div>
+
+        <div class="icon-preview-box" onclick="handleIconChange()" style="cursor: pointer; margin-top: 15px;">
+            <div id="modalIconPreview" style="min-width: 80px; min-height: 80px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.05);"></div>
+            <div class="identity-text">
+                <div style="font-size: 10px; color: var(--gold); letter-spacing: 1px; font-weight: bold;">IDENTITY PREVIEW</div>
+                <div style="font-size: 9px; color: #666; margin-top: 4px;">Click to browse variants</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="btn" onclick="closeModal()" style="background:#222;">Cancel</button>
+            <button class="btn" onclick="deleteEvent()" style="background:#311; border-color:#522;">Remove</button>
+            <button class="btn btn-gold" onclick="saveEvent()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div id="variantOverlay" class="modal-overlay" style="display:none; z-index: 2000;">
+    <div class="modal-content" style="max-width:600px; background: #111; border: 1px solid var(--gold);">
+        <h3 style="font-family:'Cinzel'; color:var(--gold); margin-top:0; display: flex; justify-content: space-between; align-items: center;">
+            Select Variant
+            <input type="text" id="variantSearch" placeholder="Filter icons..." oninput="filterVariants(this.value)" style="width: 180px; font-size: 12px; height: 30px; padding: 5px; background: #000; border: 1px solid #333; color: #fff;">
+        </h3>
+
+        <div id="variantGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(85px, 1fr)); gap:12px; max-height: 400px; overflow-y: auto; padding: 10px;">
+            </div>
+
+        <div style="margin-top:20px; text-align:right; display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-gold" onclick="closeVariantPopup()" style="min-width: 120px;">Apply Selection</button>
+        </div>
+    </div>
+</div>
+<script src="js/main.js"></script>
+
+<script src="js/calendar.js"></script>
+<script src="js/modal/host.js"></script>
+<script src="js/modal/event.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/eventModal.js"></script>
+<script src="js/Itinerary.js"></script>
+<script src="js/discord.js"></script>
+<script src="js/contextMenu.js"></script>
+
+</body>
+</html>

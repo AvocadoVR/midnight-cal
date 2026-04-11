@@ -1,0 +1,688 @@
+/* --- System Variables --- */
+:root {
+    --gold: #bf953f;
+    --gold-light: #fcf6ba;
+    --panel-bg: #0b0b0f;
+    --gold-grad: linear-gradient(135deg, #996515 0%, #bf953f 25%, #fcf6ba 50%, #bf953f 75%, #996515 100%);
+    --glass: rgba(255, 255, 255, 0.03);
+    --btn-hover: rgba(191, 149, 63, 0.15);
+}
+
+/* --- Base Layout --- */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: #050508;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 320px;
+    background: var(--panel-bg);
+    padding: 30px 20px;
+    border-right: 1px solid #2a2a40;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 100;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.section {
+    border-bottom: 1px solid #2a2a40;
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+}
+
+label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+}
+
+/* --- Inputs & Buttons --- */
+input, select {
+    width: 100%;
+    padding: 12px;
+    background: #16161e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.btn {
+    padding: 14px;
+    border: 1px solid rgba(191, 149, 63, 0.3);
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    font-size: 10px;
+    width: 100%;
+    transition: all 0.3s ease;
+    background: var(--glass);
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.btn:hover {
+    background: var(--btn-hover);
+    border-color: var(--gold);
+    transform: translateY(-1px);
+}
+
+.btn-gold {
+    background: var(--gold-grad);
+    color: #000;
+    border: none;
+}
+
+/* --- Main Canvas Area --- */
+
+.day-cell:empty {
+    visibility: hidden;
+}
+
+
+#export-area::before {
+    content: attr(data-month);
+    position: absolute;
+    bottom: 60px;
+    right: 60px;
+    font-family: 'Cinzel';
+    font-size: 160px;
+    letter-spacing: 40px;
+    color: rgba(255,255,255,0.02);
+    pointer-events: none;
+}
+
+
+.canvas-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-start; /* Changed from center to flex-start */
+    justify-content: center;
+    overflow: auto;
+    background: radial-gradient(circle at center, #050508 0%, #000 100%);
+    padding: 40px;          /* Add padding so the calendar doesn't touch the screen edges */
+    position: relative;
+}
+#export-area {
+    width: 1600px;
+    min-height: 900px; /* allows growth */
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 50px 60px;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%);
+    position: relative;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    overflow: visible; /* critical */
+}
+
+
+/* --- Calendar Grid --- */
+#month-display {
+    font-size: 85px;
+    letter-spacing: 30px;
+    /* Changed: 40px top margin, 0 left/right, 40px bottom margin */
+    margin: 50px 0 40px 0; 
+    font-family: 'Cinzel';
+    text-align: center;
+    color: #fff;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(120px, 1fr);
+    grid-template-rows: auto repeat(6, minmax(120px, 1fr));
+    gap: 12px;
+    width: 100%;
+    flex-grow: 1;
+}
+
+
+.day-header {
+    font-family: 'Cinzel';
+    font-size: 14px;
+    text-align: center;
+    color: var(--gold-light);
+    background: var(--glass);
+    padding: 12px 0;
+    letter-spacing: 5px;
+    border-bottom: 1px solid var(--gold);
+}
+
+.day-cell {
+    background: var(--glass);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 10px;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between; /* Pushes number up, text down */
+    overflow: hidden;
+    transition: background 0.2s, border 0.2s;
+    min-height: 0;
+}
+
+.itinerary-main-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 6000;
+    color: #bf953f;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.day-cell * {
+    pointer-events: none;
+}
+
+#modalIconPreview .cell-icon {
+    pointer-events: auto;
+}
+
+.day-cell {
+    pointer-events: auto !important;
+    user-select: none;
+}
+
+.day-number {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    font-size: 16px;
+    font-family: 'Cinzel';
+    opacity: 0.5;
+}
+
+.cell-icon {
+    max-width: 85%;
+    max-height: 75px;
+    object-fit: contain;
+    margin: auto;
+    flex-shrink: 0;
+    image-rendering: -webkit-optimize-contrast;
+}
+
+#modalIconPreview img {
+    max-width: 64px;
+    max-height: 64px;
+    width: auto;
+    height: auto;
+
+    filter:
+        brightness(0)
+        saturate(100%)
+        hue-rotate(var(--icon-hue))
+        brightness(1.05);
+}
+
+
+
+
+.cell-content {
+    font-size: 11px;
+    color: var(--gold-light);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 1px;
+    width: 100%;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cell-time {
+    font-size: 9px;
+    color: #888;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+/* --- Interaction States --- */
+.day-cell.selected {
+    border: 1px solid var(--gold) !important;
+    box-shadow: inset 0 0 15px rgba(191, 149, 63, 0.2);
+}
+
+.day-cell.drag-over {
+    background: rgba(191, 149, 63, 0.1) !important;
+    border: 1px dashed var(--gold) !important;
+}
+
+/* --- Itinerary Tab --- */
+#itinerary-tab {
+    position: fixed;
+    right: -450px;
+    top: 0;
+    width: 450px;
+    height: 100vh;
+    background: var(--panel-bg);
+    border-left: 1px solid var(--gold);
+    z-index: 500;
+    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+#itinerary-tab.open {
+    right: 0;
+}
+
+.tab-toggle-btn {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: var(--gold-grad);
+    border: none;
+    cursor: pointer;
+    z-index: 600;
+    font-family: 'Cinzel';
+    font-weight: bold;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.sched-item {
+    padding: 25px;
+    border-left: 4px solid var(--gold);
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 20px;
+    word-wrap: break-word;
+}
+
+/* --- Modal & Overlays --- */
+#modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(15px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #0d0d12;
+    width: 500px;
+    padding: 35px;
+    border: 1px solid var(--gold);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* --- Hue Picker & Palette --- */
+.hue-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 12px;
+    border-radius: 10px;
+    background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+    outline: none;
+    margin: 15px 0;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hue-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--gold);
+    cursor: pointer;
+}
+
+.hue-control-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#hueValue {
+    width: 60px;
+    text-align: center;
+    font-weight: bold;
+    color: var(--gold);
+}
+
+.icon-preview-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    border: 1px solid #222;
+}
+
+#modalIconPreview {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Prevents huge icons from spilling out */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+#modalIconPreview img {
+    max-width: 64px;
+    max-height: 64px;
+    width: auto;
+    height: auto;
+}
+
+
+.palette-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.palette-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.palette-swatch:hover {
+    transform: scale(1.15);
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+/* --- High-Priority Context Menu --- */
+.context-menu {
+    position: fixed;
+    z-index: 10000;
+    background: #0d0d12;
+    border: 1px solid var(--gold);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), 0 0 10px rgba(191, 149, 63, 0.2);
+    width: 180px;
+    display: none;
+    padding: 6px 0;
+    border-radius: 4px;
+    backdrop-filter: blur(10px);
+}
+
+.menu-item {
+    padding: 10px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    color: #b0b0b0;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.menu-item:hover {
+    background: var(--btn-hover);
+    color: var(--gold-light);
+    padding-left: 22px;
+}
+
+.menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 6px 0;
+}
+
+.menu-delete {
+    color: #a33;
+}
+
+.menu-delete:hover {
+    background: rgba(255, 0, 0, 0.08);
+    color: #ff5555;
+    border-left: 2px solid #ff5555;
+}
+
+
+.brand-signature {
+    position: absolute;
+    bottom: 50px;
+    right: 60px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.brand-signature img {
+    width: 48px;
+    height: auto;
+    object-fit: contain;
+
+    /* Force gold tint */
+    filter: brightness(0) saturate(100%)
+            invert(77%) sepia(34%) saturate(458%)
+            hue-rotate(358deg) brightness(92%) contrast(92%);
+}
+
+
+.brand-text {
+    font-family: 'Cinzel';
+    font-size: 14px;
+    letter-spacing: 6px;
+    color: var(--gold-light);
+    white-space: nowrap;
+}
+
+/* Container for the variants */
+.variant-card {
+    position: relative;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    /* Add margin so the checkmark has space to exist outside the border */
+    margin: 5px; 
+}
+/* Hover Effect */
+.variant-card:hover {
+    background: rgba(255, 215, 0, 0.1);
+    transform: translateY(-3px);
+}
+
+/* THE "SELECTED" STATE */
+.variant-card.active {
+    border-color: var(--gold);
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Checkmark indicator for selected item */
+.variant-card.active::after {
+    content: "✓";
+    position: absolute;
+    top: -5px;    /* Changed from -8px */
+    right: -5px;  /* Changed from -8px */
+    background: var(--gold);
+    color: black;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;  /* Ensure it sits on top */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Makes it pop */
+}
+
+#variantGrid {
+    padding: 10px; 
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 15px;
+}
+
+/* Smooth Scrollbar for the Grid */
+#variantGrid::-webkit-scrollbar {
+    width: 6px;
+}
+#variantGrid::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+
+/* The cell you are currently dragging */
+.day-cell.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+    border: 2px dashed var(--gold);
+}
+
+/* The destination cell you are hovering over */
+.day-cell.drag-over {
+    background: rgba(255, 215, 0, 0.15) !important;
+    box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Ensure smooth transitions for all state changes */
+.day-cell {
+    transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+}
+
+
+/* Container adjustments */
+#itinerary-content {
+    padding: 15px; /* Reduced from 40px to pull everything to the left */
+    background-color: #0d0d0f; 
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+/* The Event Item */
+.sched-item {
+    border-left: 1px solid #bf953f; 
+    background: transparent !important; 
+    /* Reduced bottom padding from 30px to 12px */
+    padding: 0 0 12px 20px; 
+    /* Reduced bottom margin from 10px to 4px */
+    margin-bottom: 4px;
+    border-radius: 0;
+}
+/* Hover: Keep it simple */
+.sched-item:hover {
+    background: transparent !important;
+    transform: none;
+}
+
+.sched-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15); /* Increased from 0.08 */
+    margin: 12px 0;
+    border: none;
+}
+
+/* Typography Adjustments */
+.sched-date {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #aaa; /* Brightened from #555 for better readability */
+    margin-bottom: 2px;
+}
+
+.sched-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 400; /* Regular weight Cinzel looks thinner/cleaner */
+    color: #fff;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+}
+
+.sched-main-time {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+
+
+/* Host Section */
+.sched-host-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #bf953f;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.shift-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.shift-name { font-weight: 700; color: #fff; font-size: 13px; }
+.shift-role { 
+    color: #aaa; /* Brightened from #888 to match the new date color */
+    font-size: 11px; 
+    margin-left: 8px; 
+    font-weight: 300; 
+}
+.shift-times { color: #bf953f; font-weight: 600; font-size: 12px; }
+
+.no-events-msg {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: #bf953f;
+    text-align: center;
+    margin-top: 30px;
+}
