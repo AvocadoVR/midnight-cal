@@ -20,7 +20,7 @@ window.SYSTEM_CONFIG = {
         { name: "Jackbox Games", file: "jackbox.png" },
 		{ name: "Goose Goose Duck", file: "ggd.png" }
     ],
-    hosts: ["None", "Avocado", "Yui", "Astra", "nFinity", "Kinn", "Silvanus", "Therisol", "TBA"],
+    hosts: ["None", "Avocado", "Yui", "Astra", "nFinity", "Kinn", "Gaster", "Therisol", "DMAR" "TBA"],
     defaultIcon: "ms_logo.png" 
 };
 
